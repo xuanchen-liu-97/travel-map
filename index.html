@@ -58,20 +58,19 @@
 
   /* Custom marker */
   .custom-marker {
-    width: 16px; height: 16px;
     background: radial-gradient(circle, #60a5fa 0%, #3b82f6 50%, transparent 70%);
     border-radius: 50%;
-    box-shadow: 0 0 12px 4px rgba(96,165,250,0.4);
+    box-shadow: 0 0 8px 3px rgba(96,165,250,0.4);
     animation: pulse 2.5s ease-in-out infinite;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s, width 0.3s, height 0.3s;
   }
   .custom-marker:hover {
     transform: scale(1.8);
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 12px 4px rgba(96,165,250,0.4); }
-    50% { box-shadow: 0 0 20px 8px rgba(96,165,250,0.6); }
+    0%, 100% { box-shadow: 0 0 8px 3px rgba(96,165,250,0.4); }
+    50% { box-shadow: 0 0 14px 6px rgba(96,165,250,0.6); }
   }
 
   /* Popup override */
@@ -384,13 +383,31 @@ function createPopupHTML(place) {
   `;
 }
 
+// Marker size based on zoom
+function getMarkerSize(zoom) {
+  if (zoom <= 3) return 6;
+  if (zoom <= 5) return 10;
+  if (zoom <= 8) return 14;
+  return 18;
+}
+
+function updateMarkerSizes() {
+  const zoom = map.getZoom();
+  const size = getMarkerSize(zoom);
+  document.querySelectorAll('.custom-marker').forEach(el => {
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+  });
+}
+
 // Add markers
 const markers = [];
 travelData.forEach(place => {
+  const initSize = getMarkerSize(map.getZoom());
   const icon = L.divIcon({
     className: 'custom-marker',
-    iconSize: [16, 16],
-    iconAnchor: [8, 8]
+    iconSize: [initSize, initSize],
+    iconAnchor: [initSize / 2, initSize / 2]
   });
 
   const marker = L.marker(place.coords, { icon })
@@ -415,6 +432,10 @@ L.polyline(sortedCoords, {
   weight: 1.5,
   dashArray: '6 8'
 }).addTo(map);
+
+// Update marker size on zoom
+map.on('zoomend', updateMarkerSizes);
+updateMarkerSizes();
 
 // Stats
 const countries = new Set(travelData.map(p => p.country));
