@@ -248,23 +248,86 @@
     letter-spacing: 2px;
     margin-bottom: 16px;
   }
-  .sidebar .place-item {
-    padding: 12px 16px;
+  .sidebar .search-box {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(96,165,250,0.15);
+    background: rgba(255,255,255,0.04);
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .sidebar .search-box::placeholder { color: #475569; }
+  .sidebar .search-box:focus { border-color: rgba(96,165,250,0.5); }
+  .sidebar .country-group { margin-bottom: 6px; }
+  .sidebar .country-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s;
-    margin-bottom: 4px;
+    user-select: none;
+  }
+  .sidebar .country-header:hover { background: rgba(96,165,250,0.08); }
+  .sidebar .country-header h3 {
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    font-weight: 600;
+  }
+  .sidebar .country-header .country-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  .sidebar .country-header .arrow {
+    transition: transform 0.25s;
+    color: #475569;
+    font-size: 0.7rem;
+  }
+  .sidebar .country-header.open .arrow { transform: rotate(90deg); }
+  .sidebar .country-cities {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sidebar .country-cities.open { max-height: 2000px; }
+  .sidebar .place-item {
+    padding: 10px 16px 10px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 2px;
   }
   .sidebar .place-item:hover { background: rgba(96,165,250,0.08); }
   .sidebar .place-item h4 {
-    color: #e2e8f0;
-    font-size: 0.95rem;
+    color: #cbd5e1;
+    font-size: 0.88rem;
     margin-bottom: 2px;
   }
   .sidebar .place-item p {
     color: #64748b;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
+  .sidebar .trip-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(96,165,250,0.1);
+    color: #60a5fa;
+    font-size: 0.7rem;
+    margin: 2px 4px 2px 0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sidebar .trip-tag:hover { background: rgba(96,165,250,0.25); }
   .sidebar-overlay {
     display: none;
     position: fixed;
@@ -447,18 +510,133 @@ document.getElementById('stat-photos').textContent = travelData.reduce((s, p) =>
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.innerHTML = '<h2>所有地点</h2>';
+
+  // Search box
+  const search = document.createElement('input');
+  search.className = 'search-box';
+  search.placeholder = '🔍 搜索城市或国家...';
+  search.oninput = () => filterSidebar(search.value.trim().toLowerCase());
+  sidebar.appendChild(search);
+
+  // Group by country
+  const grouped = {};
   travelData.forEach((place, i) => {
-    const item = document.createElement('div');
-    item.className = 'place-item';
-    item.innerHTML = `<h4>${place.name}</h4><p>${place.country} · ${place.date} · ${place.photos.length} 张照片</p>`;
-    item.onclick = () => {
-      map.flyTo(place.coords, 12, { duration: 1.5 });
-      markers[i].marker.openPopup();
-      toggleSidebar();
+    if (!grouped[place.country]) grouped[place.country] = [];
+    grouped[place.country].push({ ...place, _index: i });
+  });
+
+  // Within each country, merge same city
+  const container = document.createElement('div');
+  container.id = 'sidebar-list';
+
+  Object.keys(grouped).sort().forEach(country => {
+    const places = grouped[country];
+    const group = document.createElement('div');
+    group.className = 'country-group';
+    group.dataset.country = country.toLowerCase();
+
+    // Merge cities
+    const cityMap = {};
+    places.forEach(p => {
+      if (!cityMap[p.name]) cityMap[p.name] = [];
+      cityMap[p.name].push(p);
+    });
+    const cityCount = Object.keys(cityMap).length;
+    const tripCount = places.length;
+
+    // Country header
+    const header = document.createElement('div');
+    header.className = 'country-header';
+    header.innerHTML = `
+      <h3>${country}</h3>
+      <div class="country-meta">
+        <span>${cityCount} 城市${tripCount > cityCount ? ' · ' + tripCount + ' 次' : ''}</span>
+        <span class="arrow">▶</span>
+      </div>
+    `;
+    header.onclick = () => {
+      header.classList.toggle('open');
+      citiesDiv.classList.toggle('open');
     };
-    sidebar.appendChild(item);
+    group.appendChild(header);
+
+    // Cities
+    const citiesDiv = document.createElement('div');
+    citiesDiv.className = 'country-cities';
+
+    Object.keys(cityMap).forEach(cityName => {
+      const trips = cityMap[cityName];
+      const item = document.createElement('div');
+      item.className = 'place-item';
+      item.dataset.name = cityName.toLowerCase();
+
+      const totalPhotos = trips.reduce((s, t) => s + t.photos.length, 0);
+
+      if (trips.length === 1) {
+        // Single trip
+        const t = trips[0];
+        item.innerHTML = `<h4>${cityName}</h4><p>${t.date} · ${totalPhotos} 张照片</p>`;
+        item.onclick = () => flyToPlace(t._index);
+      } else {
+        // Multiple trips — show tags
+        const tags = trips.map(t =>
+          `<span class="trip-tag" data-idx="${t._index}">${t.date}</span>`
+        ).join('');
+        item.innerHTML = `<h4>${cityName} <span style="color:#64748b;font-weight:400;font-size:0.75rem">${trips.length}次</span></h4>
+          <p>${totalPhotos} 张照片</p>
+          <div style="margin-top:4px">${tags}</div>`;
+        item.querySelectorAll('.trip-tag').forEach(tag => {
+          tag.onclick = (e) => {
+            e.stopPropagation();
+            flyToPlace(parseInt(tag.dataset.idx));
+          };
+        });
+        item.onclick = () => flyToPlace(trips[0]._index);
+      }
+      citiesDiv.appendChild(item);
+    });
+
+    group.appendChild(citiesDiv);
+    container.appendChild(group);
+  });
+
+  sidebar.appendChild(container);
+}
+
+function flyToPlace(index) {
+  const place = travelData[index];
+  map.flyTo(place.coords, 12, { duration: 1.5 });
+  markers[index].marker.openPopup();
+  toggleSidebar();
+}
+
+function filterSidebar(query) {
+  document.querySelectorAll('.country-group').forEach(group => {
+    const country = group.dataset.country;
+    const items = group.querySelectorAll('.place-item');
+    let groupMatch = country.includes(query);
+    let anyVisible = false;
+
+    items.forEach(item => {
+      const name = item.dataset.name;
+      const visible = !query || groupMatch || name.includes(query);
+      item.style.display = visible ? '' : 'none';
+      if (visible) anyVisible = true;
+    });
+
+    group.style.display = anyVisible ? '' : 'none';
+
+    // Auto expand when searching
+    if (query && anyVisible) {
+      group.querySelector('.country-header').classList.add('open');
+      group.querySelector('.country-cities').classList.add('open');
+    } else if (!query) {
+      group.querySelector('.country-header').classList.remove('open');
+      group.querySelector('.country-cities').classList.remove('open');
+    }
   });
 }
+
 buildSidebar();
 
 function toggleSidebar() {
