@@ -18,10 +18,10 @@
 
 const travelData = [
   {
-    name: "东京",
-    country: "日本",
-    coords: [35.6762, 139.6503],
-    date: "2024-03",
+    name: "伦敦",
+    country: "英国",
+    coords: [51.5, 0.1],
+    date: "2025-08",
     description: "春天的东京，樱花盛开，在上野公园和目黑川沿岸漫步。",
     photos: [
       {
