@@ -39,6 +39,48 @@ const travelData = [
     ]
   },
   {
+    name: "白崖",
+    country: "英国",
+    coords: [50.7486, 0.1900],
+    date: "2025-08",
+    description: "春天的东京，樱花盛开，在上野公园和目黑川沿岸漫步。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+        caption: "东京塔夜景"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800",
+        caption: "浅草寺"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800",
+        caption: "目黑川樱花"
+      }
+    ]
+  },
+  {
+    name: "科茨沃尔德",
+    country: "英国",
+    coords: [51.8902, -1.7586],
+    date: "2025-08",
+    description: "春天的东京，樱花盛开，在上野公园和目黑川沿岸漫步。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+        caption: "东京塔夜景"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800",
+        caption: "浅草寺"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800",
+        caption: "目黑川樱花"
+      }
+    ]
+  },
+  {
     name: "京都",
     country: "日本",
     coords: [35.0116, 135.7681],
