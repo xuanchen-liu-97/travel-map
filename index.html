@@ -590,8 +590,8 @@ function buildSidebar() {
   const toggle = document.createElement('div');
   toggle.className = 'view-toggle';
   toggle.innerHTML = `
-    <button data-view="country" class="${currentView === 'country' ? 'active' : ''}">🌍 按国家</button>
-    <button data-view="timeline" class="${currentView === 'timeline' ? 'active' : ''}">🕐 时间线</button>
+    <button data-view="country" class="${currentView === 'country' ? 'active' : ''}">🌍 国家</button>
+    <button data-view="timeline" class="${currentView === 'timeline' ? 'active' : ''}">🕐 时间</button>
   `;
   toggle.querySelectorAll('button').forEach(btn => {
     btn.onclick = () => {
@@ -697,29 +697,15 @@ function buildCountryView(container) {
 }
 
 function buildTimelineView(container) {
-  // Sort by date descending (newest first)
   const sorted = travelData.map((p, i) => ({ ...p, _index: i }))
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  let currentMonth = '';
-
   sorted.forEach(place => {
-    const monthKey = place.date; // e.g. "2024-03"
-    if (monthKey !== currentMonth) {
-      currentMonth = monthKey;
-      const monthLabel = document.createElement('div');
-      monthLabel.className = 'timeline-month';
-      // Format: "2024-03" → "2024 年 3 月"
-      const [y, m] = monthKey.split('-');
-      monthLabel.textContent = `${y} 年 ${parseInt(m)} 月`;
-      container.appendChild(monthLabel);
-    }
-
     const item = document.createElement('div');
     item.className = 'timeline-item';
     item.dataset.name = place.name.toLowerCase();
     item.dataset.country = place.country.toLowerCase();
-    item.innerHTML = `<h4>${place.name}</h4><p>${place.country} · ${place.photos.length} 张照片</p>`;
+    item.innerHTML = `<h4>${place.name}</h4><p>${place.country} · ${place.date} · ${place.photos.length} 张照片</p>`;
     item.onclick = () => flyToPlace(place._index);
     container.appendChild(item);
   });
@@ -764,16 +750,6 @@ function filterSidebar(query) {
       const country = item.dataset.country;
       const visible = !query || name.includes(query) || country.includes(query);
       item.style.display = visible ? '' : 'none';
-    });
-    document.querySelectorAll('.timeline-month').forEach(label => {
-      const next = [];
-      let sib = label.nextElementSibling;
-      while (sib && !sib.classList.contains('timeline-month')) {
-        next.push(sib);
-        sib = sib.nextElementSibling;
-      }
-      const anyVisible = next.some(el => el.style.display !== 'none');
-      label.style.display = anyVisible ? '' : 'none';
     });
   }
 }
