@@ -248,6 +248,31 @@
     letter-spacing: 2px;
     margin-bottom: 16px;
   }
+  .sidebar .view-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(96,165,250,0.12);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .sidebar .view-toggle button {
+    flex: 1;
+    padding: 8px 0;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .sidebar .view-toggle button.active {
+    background: rgba(96,165,250,0.15);
+    color: #60a5fa;
+  }
+  .sidebar .view-toggle button:hover:not(.active) {
+    color: #94a3b8;
+  }
   .sidebar .search-box {
     width: 100%;
     padding: 10px 14px;
@@ -328,6 +353,54 @@
     transition: background 0.2s;
   }
   .sidebar .trip-tag:hover { background: rgba(96,165,250,0.25); }
+  /* Timeline view */
+  .sidebar .timeline-group { margin-bottom: 6px; }
+  .sidebar .timeline-month {
+    padding: 8px 14px 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,18,0.95);
+    z-index: 1;
+  }
+  .sidebar .timeline-item {
+    padding: 10px 16px 10px 28px;
+    border-left: 2px solid rgba(96,165,250,0.15);
+    margin-left: 20px;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    margin-bottom: 2px;
+    position: relative;
+  }
+  .sidebar .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 15px;
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(96,165,250,0.5);
+  }
+  .sidebar .timeline-item:hover {
+    background: rgba(96,165,250,0.08);
+    border-left-color: rgba(96,165,250,0.4);
+  }
+  .sidebar .timeline-item h4 {
+    color: #cbd5e1;
+    font-size: 0.88rem;
+    margin-bottom: 2px;
+  }
+  .sidebar .timeline-item p {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
   .sidebar-overlay {
     display: none;
     position: fixed;
@@ -507,9 +580,26 @@ document.getElementById('stat-cities').textContent = travelData.length;
 document.getElementById('stat-photos').textContent = travelData.reduce((s, p) => s + p.photos.length, 0);
 
 // Sidebar
+let currentView = 'country'; // 'country' or 'timeline'
+
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.innerHTML = '<h2>所有地点</h2>';
+
+  // View toggle
+  const toggle = document.createElement('div');
+  toggle.className = 'view-toggle';
+  toggle.innerHTML = `
+    <button data-view="country" class="${currentView === 'country' ? 'active' : ''}">🌍 按国家</button>
+    <button data-view="timeline" class="${currentView === 'timeline' ? 'active' : ''}">🕐 时间线</button>
+  `;
+  toggle.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      currentView = btn.dataset.view;
+      buildSidebar();
+    };
+  });
+  sidebar.appendChild(toggle);
 
   // Search box
   const search = document.createElement('input');
@@ -518,16 +608,25 @@ function buildSidebar() {
   search.oninput = () => filterSidebar(search.value.trim().toLowerCase());
   sidebar.appendChild(search);
 
+  const container = document.createElement('div');
+  container.id = 'sidebar-list';
+
+  if (currentView === 'country') {
+    buildCountryView(container);
+  } else {
+    buildTimelineView(container);
+  }
+
+  sidebar.appendChild(container);
+}
+
+function buildCountryView(container) {
   // Group by country
   const grouped = {};
   travelData.forEach((place, i) => {
     if (!grouped[place.country]) grouped[place.country] = [];
     grouped[place.country].push({ ...place, _index: i });
   });
-
-  // Within each country, merge same city
-  const container = document.createElement('div');
-  container.id = 'sidebar-list';
 
   Object.keys(grouped).sort().forEach(country => {
     const places = grouped[country];
@@ -544,7 +643,6 @@ function buildSidebar() {
     const cityCount = Object.keys(cityMap).length;
     const tripCount = places.length;
 
-    // Country header
     const header = document.createElement('div');
     header.className = 'country-header';
     header.innerHTML = `
@@ -560,7 +658,6 @@ function buildSidebar() {
     };
     group.appendChild(header);
 
-    // Cities
     const citiesDiv = document.createElement('div');
     citiesDiv.className = 'country-cities';
 
@@ -573,12 +670,10 @@ function buildSidebar() {
       const totalPhotos = trips.reduce((s, t) => s + t.photos.length, 0);
 
       if (trips.length === 1) {
-        // Single trip
         const t = trips[0];
         item.innerHTML = `<h4>${cityName}</h4><p>${t.date} · ${totalPhotos} 张照片</p>`;
         item.onclick = () => flyToPlace(t._index);
       } else {
-        // Multiple trips — show tags
         const tags = trips.map(t =>
           `<span class="trip-tag" data-idx="${t._index}">${t.date}</span>`
         ).join('');
@@ -599,8 +694,35 @@ function buildSidebar() {
     group.appendChild(citiesDiv);
     container.appendChild(group);
   });
+}
 
-  sidebar.appendChild(container);
+function buildTimelineView(container) {
+  // Sort by date descending (newest first)
+  const sorted = travelData.map((p, i) => ({ ...p, _index: i }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  let currentMonth = '';
+
+  sorted.forEach(place => {
+    const monthKey = place.date; // e.g. "2024-03"
+    if (monthKey !== currentMonth) {
+      currentMonth = monthKey;
+      const monthLabel = document.createElement('div');
+      monthLabel.className = 'timeline-month';
+      // Format: "2024-03" → "2024 年 3 月"
+      const [y, m] = monthKey.split('-');
+      monthLabel.textContent = `${y} 年 ${parseInt(m)} 月`;
+      container.appendChild(monthLabel);
+    }
+
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.dataset.name = place.name.toLowerCase();
+    item.dataset.country = place.country.toLowerCase();
+    item.innerHTML = `<h4>${place.name}</h4><p>${place.country} · ${place.photos.length} 张照片</p>`;
+    item.onclick = () => flyToPlace(place._index);
+    container.appendChild(item);
+  });
 }
 
 function flyToPlace(index) {
@@ -611,30 +733,49 @@ function flyToPlace(index) {
 }
 
 function filterSidebar(query) {
-  document.querySelectorAll('.country-group').forEach(group => {
-    const country = group.dataset.country;
-    const items = group.querySelectorAll('.place-item');
-    let groupMatch = country.includes(query);
-    let anyVisible = false;
+  if (currentView === 'country') {
+    document.querySelectorAll('.country-group').forEach(group => {
+      const country = group.dataset.country;
+      const items = group.querySelectorAll('.place-item');
+      let groupMatch = country.includes(query);
+      let anyVisible = false;
 
-    items.forEach(item => {
-      const name = item.dataset.name;
-      const visible = !query || groupMatch || name.includes(query);
-      item.style.display = visible ? '' : 'none';
-      if (visible) anyVisible = true;
+      items.forEach(item => {
+        const name = item.dataset.name;
+        const visible = !query || groupMatch || name.includes(query);
+        item.style.display = visible ? '' : 'none';
+        if (visible) anyVisible = true;
+      });
+
+      group.style.display = anyVisible ? '' : 'none';
+
+      if (query && anyVisible) {
+        group.querySelector('.country-header').classList.add('open');
+        group.querySelector('.country-cities').classList.add('open');
+      } else if (!query) {
+        group.querySelector('.country-header').classList.remove('open');
+        group.querySelector('.country-cities').classList.remove('open');
+      }
     });
-
-    group.style.display = anyVisible ? '' : 'none';
-
-    // Auto expand when searching
-    if (query && anyVisible) {
-      group.querySelector('.country-header').classList.add('open');
-      group.querySelector('.country-cities').classList.add('open');
-    } else if (!query) {
-      group.querySelector('.country-header').classList.remove('open');
-      group.querySelector('.country-cities').classList.remove('open');
-    }
-  });
+  } else {
+    // Timeline filter
+    document.querySelectorAll('.timeline-item').forEach(item => {
+      const name = item.dataset.name;
+      const country = item.dataset.country;
+      const visible = !query || name.includes(query) || country.includes(query);
+      item.style.display = visible ? '' : 'none';
+    });
+    document.querySelectorAll('.timeline-month').forEach(label => {
+      const next = [];
+      let sib = label.nextElementSibling;
+      while (sib && !sib.classList.contains('timeline-month')) {
+        next.push(sib);
+        sib = sib.nextElementSibling;
+      }
+      const anyVisible = next.some(el => el.style.display !== 'none');
+      label.style.display = anyVisible ? '' : 'none';
+    });
+  }
 }
 
 buildSidebar();
