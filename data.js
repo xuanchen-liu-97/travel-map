@@ -81,6 +81,40 @@ const travelData = [
     ]
   },
   {
+    name: "景泰",
+    country: "中国甘肃",
+    coords: [36.8902, 104.3171],
+    date: "2024-03",
+    description: "千年古都的庭院与神社，时间仿佛在这里静止。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
+        caption: "伏见稻荷大社"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=800",
+        caption: "岚山竹林"
+      }
+    ]
+  },
+  {
+    name: "呼和浩特",
+    country: "中国内蒙古",
+    coords: [44.0734, 117.8832],
+    date: "2024-03",
+    description: "千年古都的庭院与神社，时间仿佛在这里静止。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
+        caption: "伏见稻荷大社"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=800",
+        caption: "岚山竹林"
+      }
+    ]
+  },
+  {
     name: "京都",
     country: "日本",
     coords: [35.0116, 135.7681],
