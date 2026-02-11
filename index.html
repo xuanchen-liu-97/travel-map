@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的旅行足迹</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 16px 32px;
+    background: linear-gradient(180deg, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.7) 70%, transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .header > * { pointer-events: auto; }
+  .header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  .header .stats {
+    display: flex;
+    gap: 24px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  .stats span strong {
+    color: #60a5fa;
+    font-size: 1.1rem;
+  }
+
+  /* ===== Map ===== */
+  #map {
+    width: 100%;
+    height: 100vh;
+  }
+  .leaflet-container { background: #0a0a0f; }
+
+  /* Custom marker */
+  .custom-marker {
+    width: 16px; height: 16px;
+    background: radial-gradient(circle, #60a5fa 0%, #3b82f6 50%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 12px 4px rgba(96,165,250,0.4);
+    animation: pulse 2.5s ease-in-out infinite;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .custom-marker:hover {
+    transform: scale(1.8);
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 12px 4px rgba(96,165,250,0.4); }
+    50% { box-shadow: 0 0 20px 8px rgba(96,165,250,0.6); }
+  }
+
+  /* Popup override */
+  .leaflet-popup-content-wrapper {
+    background: rgba(15,15,25,0.95) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(96,165,250,0.2);
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+    padding: 0 !important;
+    overflow: hidden;
+    max-width: 380px;
+  }
+  .leaflet-popup-content { margin: 0 !important; width: auto !important; }
+  .leaflet-popup-tip { background: rgba(15,15,25,0.95) !important; }
+  .leaflet-popup-close-button {
+    color: #94a3b8 !important;
+    font-size: 20px !important;
+    top: 8px !important;
+    right: 12px !important;
+    z-index: 10;
+  }
+  .leaflet-popup-close-button:hover { color: #fff !important; }
+
+  /* Popup inner content */
+  .popup-card { width: 340px; }
+  .popup-card .popup-header {
+    padding: 20px 20px 12px;
+  }
+  .popup-card .popup-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+  .popup-card .popup-header .location-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .popup-card .popup-header .location-meta svg {
+    width: 14px; height: 14px;
+    fill: #64748b;
+  }
+  .popup-card .popup-desc {
+    padding: 0 20px 16px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+  .popup-card .photo-grid {
+    display: grid;
+    gap: 3px;
+    padding: 0 3px 3px;
+  }
+  .popup-card .photo-grid.cols-1 { grid-template-columns: 1fr; }
+  .popup-card .photo-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .popup-card .photo-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .popup-card .photo-grid img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    display: block;
+  }
+  .popup-card .photo-grid img:hover {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
+  .popup-card .photo-grid.cols-1 img { height: 200px; border-radius: 0 0 12px 12px; }
+
+  /* ===== Lightbox ===== */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 80px rgba(96,165,250,0.15);
+  }
+  .lightbox .lb-caption {
+    margin-top: 16px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+  .lightbox .lb-close {
+    position: absolute;
+    top: 24px; right: 32px;
+    font-size: 2rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none; border: none;
+    line-height: 1;
+  }
+  .lightbox .lb-close:hover { color: #fff; }
+  .lightbox .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    color: #64748b;
+    cursor: pointer;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    width: 52px; height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .lightbox .lb-nav:hover { color: #fff; background: rgba(255,255,255,0.1); }
+  .lightbox .lb-prev { left: 24px; }
+  .lightbox .lb-next { right: 24px; }
+  .lightbox .lb-counter {
+    position: absolute;
+    bottom: 24px;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+
+  /* ===== Sidebar List (optional) ===== */
+  .sidebar-toggle {
+    position: fixed;
+    bottom: 24px; left: 24px;
+    z-index: 1001;
+    background: rgba(15,15,25,0.9);
+    border: 1px solid rgba(96,165,250,0.3);
+    color: #60a5fa;
+    padding: 10px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+  }
+  .sidebar-toggle:hover {
+    background: rgba(96,165,250,0.15);
+    border-color: #60a5fa;
+  }
+  .sidebar {
+    position: fixed;
+    left: -360px;
+    top: 0; bottom: 0;
+    width: 340px;
+    z-index: 1002;
+    background: rgba(10,10,18,0.97);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(96,165,250,0.1);
+    transition: left 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    padding: 80px 20px 20px;
+  }
+  .sidebar.open { left: 0; }
+  .sidebar h2 {
+    font-size: 1rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .sidebar .place-item {
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 4px;
+  }
+  .sidebar .place-item:hover { background: rgba(96,165,250,0.08); }
+  .sidebar .place-item h4 {
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+  .sidebar .place-item p {
+    color: #64748b;
+    font-size: 0.78rem;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1001;
+  }
+  .sidebar-overlay.open { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>✦ 我的旅行足迹</h1>
+  <div class="stats">
+    <span><strong id="stat-countries">0</strong> 个国家</span>
+    <span><strong id="stat-cities">0</strong> 个城市</span>
+    <span><strong id="stat-photos">0</strong> 张照片</span>
+  </div>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Sidebar -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">📍 地点列表</button>
+<div class="sidebar" id="sidebar"></div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <button class="lb-nav lb-prev" onclick="navLightbox(-1)">‹</button>
+  <button class="lb-nav lb-next" onclick="navLightbox(1)">›</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-caption" id="lb-caption"></div>
+  <div class="lb-counter" id="lb-counter"></div>
+</div>
+
+<script>
+// ============================================================
+//  🌍 在这里配置你的旅行数据
+//  每个地点包含: name, country, coords, date, description, photos
+//  photos 数组中每个对象: { url: "图片链接", caption: "说明" }
+//
+//  💡 500px 照片链接方法:
+//     打开你的 500px 照片 → 右键图片 → 复制图片地址
+//     或使用格式: https://drscdn.500px.org/photo/xxxxx/m%3D900/v2?sig=xxx
+// ============================================================
+
+const travelData = [
+  {
+    name: "东京",
+    country: "日本",
+    coords: [35.6762, 139.6503],
+    date: "2024-03",
+    description: "春天的东京，樱花盛开，在上野公园和目黑川沿岸漫步。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
+        caption: "东京塔夜景"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800",
+        caption: "浅草寺"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800",
+        caption: "目黑川樱花"
+      }
+    ]
+  },
+  {
+    name: "京都",
+    country: "日本",
+    coords: [35.0116, 135.7681],
+    date: "2024-03",
+    description: "千年古都的庭院与神社，时间仿佛在这里静止。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
+        caption: "伏见稻荷大社"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=800",
+        caption: "岚山竹林"
+      }
+    ]
+  },
+  {
+    name: "巴黎",
+    country: "法国",
+    coords: [48.8566, 2.3522],
+    date: "2023-09",
+    description: "在塞纳河畔散步，登上埃菲尔铁塔俯瞰整座城市。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800",
+        caption: "埃菲尔铁塔"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800",
+        caption: "塞纳河日落"
+      }
+    ]
+  },
+  {
+    name: "冰岛",
+    country: "冰岛",
+    coords: [64.9631, -19.0208],
+    date: "2023-12",
+    description: "追逐极光、徒步冰川，感受地球最原始的力量。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=800",
+        caption: "北极光"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=800",
+        caption: "黑沙滩"
+      }
+    ]
+  },
+  {
+    name: "纽约",
+    country: "美国",
+    coords: [40.7128, -74.0060],
+    date: "2024-06",
+    description: "城市丛林中的活力与多元文化，永远充满惊喜。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800",
+        caption: "曼哈顿天际线"
+      }
+    ]
+  },
+  {
+    name: "清迈",
+    country: "泰国",
+    coords: [18.7883, 98.9853],
+    date: "2024-01",
+    description: "在古城中穿梭，品尝街头美食，体验寺庙文化。",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1512553944907-1d8a2d4e0894?w=800",
+        caption: "素贴山双龙寺"
+      },
+      {
+        url: "https://images.unsplash.com/photo-1569959220744-ff553533f492?w=800",
+        caption: "周末夜市"
+      }
+    ]
+  }
+];
+
+// ============================================================
+//  Below is the engine — no need to modify
+// ============================================================
+
+// Init map
+const map = L.map('map', {
+  center: [25, 10],
+  zoom: 3,
+  minZoom: 2,
+  maxZoom: 18,
+  zoomControl: false,
+  attributionControl: false
+});
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// Dark tile layer
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap © CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// Lightbox state
+let lbPhotos = [];
+let lbIndex = 0;
+
+function openLightbox(photos, index) {
+  lbPhotos = photos;
+  lbIndex = index;
+  updateLightbox();
+  document.getElementById('lightbox').classList.add('active');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+
+function navLightbox(dir) {
+  lbIndex = (lbIndex + dir + lbPhotos.length) % lbPhotos.length;
+  updateLightbox();
+}
+
+function updateLightbox() {
+  document.getElementById('lb-img').src = lbPhotos[lbIndex].url;
+  document.getElementById('lb-caption').textContent = lbPhotos[lbIndex].caption || '';
+  document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${lbPhotos.length}`;
+}
+
+// Keyboard nav
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+// Build popup HTML
+function createPopupHTML(place) {
+  const colClass = place.photos.length === 1 ? 'cols-1' : place.photos.length === 2 ? 'cols-2' : 'cols-3';
+  const photosHTML = place.photos.map((p, i) =>
+    `<img src="${p.url}" alt="${p.caption || ''}" loading="lazy" onclick="openLightbox(travelData.find(d=>d.name==='${place.name}').photos, ${i})" />`
+  ).join('');
+
+  return `
+    <div class="popup-card">
+      <div class="popup-header">
+        <h3>${place.name}</h3>
+        <div class="location-meta">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          ${place.country} · ${place.date}
+        </div>
+      </div>
+      <div class="popup-desc">${place.description}</div>
+      <div class="photo-grid ${colClass}">${photosHTML}</div>
+    </div>
+  `;
+}
+
+// Add markers
+const markers = [];
+travelData.forEach(place => {
+  const icon = L.divIcon({
+    className: 'custom-marker',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+
+  const marker = L.marker(place.coords, { icon })
+    .addTo(map)
+    .bindPopup(createPopupHTML(place), {
+      maxWidth: 360,
+      minWidth: 340,
+      closeButton: true,
+      className: ''
+    });
+
+  markers.push({ marker, place });
+});
+
+// Draw path line connecting locations (optional — chronological route)
+const sortedCoords = [...travelData]
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .map(p => p.coords);
+
+L.polyline(sortedCoords, {
+  color: 'rgba(96,165,250,0.15)',
+  weight: 1.5,
+  dashArray: '6 8'
+}).addTo(map);
+
+// Stats
+const countries = new Set(travelData.map(p => p.country));
+document.getElementById('stat-countries').textContent = countries.size;
+document.getElementById('stat-cities').textContent = travelData.length;
+document.getElementById('stat-photos').textContent = travelData.reduce((s, p) => s + p.photos.length, 0);
+
+// Sidebar
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '<h2>所有地点</h2>';
+  travelData.forEach((place, i) => {
+    const item = document.createElement('div');
+    item.className = 'place-item';
+    item.innerHTML = `<h4>${place.name}</h4><p>${place.country} · ${place.date} · ${place.photos.length} 张照片</p>`;
+    item.onclick = () => {
+      map.flyTo(place.coords, 12, { duration: 1.5 });
+      markers[i].marker.openPopup();
+      toggleSidebar();
+    };
+    sidebar.appendChild(item);
+  });
+}
+buildSidebar();
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>
