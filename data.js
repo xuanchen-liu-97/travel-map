@@ -46,15 +46,15 @@ const travelData = [
     description: "世界尽头--七姐妹白崖",
     photos: [
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
-      },
-      {
         url: "./photos/53e63925ac1b7dc58574a0a46b39d605.jpg",
-        caption: ""
+        caption: "城堡为爱守着秘密"
       },
       {
         url: "./photos/57c723c874ad138d2c4cbde9bb0bd623.jpg",
+        caption: "而我为你守着回忆"
+      },
+      {
+        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
         caption: ""
       }
     ]
@@ -143,6 +143,6 @@ const travelData = [
         caption: "黄河石林"
       }
     ]
-  },
+  }
 
 ];
