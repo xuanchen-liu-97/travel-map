@@ -20,7 +20,7 @@ const travelData = [
   {
     name: "剑桥",
     country: "英国",
-    coords: [51.8902, -1.7586],
+    coords: [52.2035, 0.1146],
     date: "2025-08",
     description: "去了剑桥但没去剑桥大学",
     photos: [
@@ -54,7 +54,7 @@ const travelData = [
         caption: ""
       },
       {
-        url: "./57c723c874ad138d2c4cbde9bb0bd623.jpg",
+        url: "./photos/57c723c874ad138d2c4cbde9bb0bd623.jpg",
         caption: ""
       }
     ]
@@ -62,7 +62,7 @@ const travelData = [
   {
     name: "伦敦",
     country: "英国",
-    coords: [51.5, 0.1],
+    coords: [51.5074, -0.1278],
     date: "2025-08",
     description: "第一次来到英国",
     photos: [
@@ -139,7 +139,7 @@ const travelData = [
     description: "第一次一起看星星",
     photos: [
       {
-        url: "DSC07776.jpg",
+        url: "./photos/DSC07776.jpg",
         caption: "黄河石林"
       }
     ]
