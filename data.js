@@ -33,8 +33,8 @@ const travelData = [
         caption: "久闻叹息桥大名"
       },
       {
-        url: "./photos/剑桥3.jpg",
-        caption: ""
+        url: "./photos/剑桥4.jpg",
+        caption: "英国小镇的感觉一下就出来了"
       }
     ]
   },
@@ -55,7 +55,7 @@ const travelData = [
       },
       {
         url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        caption: "贴贴"
       }
     ]
   },
@@ -67,16 +67,16 @@ const travelData = [
     description: "第一次来到英国",
     photos: [
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        url: "./photos/伦敦1.jpg",
+        caption: "来打卡了！"
       },
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        url: "./photos/伦敦2.jpg",
+        caption: "著名景点塔桥，结果我现在每天都看到"
       },
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        url: "./photos/伦敦3.jpg",
+        caption: "喝到了伦敦限定！"
       }
     ]
   },
@@ -89,7 +89,7 @@ const travelData = [
     photos: [
       {
         url: "./photos/内蒙1.jpg",
-        caption: ""
+        caption: "by Mom"
       }
     ]
   },
@@ -102,7 +102,7 @@ const travelData = [
     photos: [
       {
         url: "./photos/霞浦1.jpg",
-        caption: ""
+        caption: "牛马假日"
       },
       {
         url: "./photos/霞浦2.jpg",
@@ -123,11 +123,11 @@ const travelData = [
     photos: [
       {
         url: "./photos/景德镇1.jpg",
-        caption: ""
+        caption: "我的猪真美"
       },
       {
         url: "./photos/景德镇2.jpg",
-        caption: ""
+        caption: "城市打卡照高手"
       }
     ]
   },
@@ -140,7 +140,7 @@ const travelData = [
     photos: [
       {
         url: "./photos/DSC07776.jpg",
-        caption: "黄河石林"
+        caption: "抬起头一起数星星"
       }
     ]
   }
