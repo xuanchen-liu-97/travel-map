@@ -22,7 +22,7 @@ const travelData = [
     country: "英国",
     coords: [51.8902, -1.7586],
     date: "2025-08",
-    description: "尝试英国的小镇",
+    description: "探索英国的小镇",
     photos: [
       {
         url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
@@ -121,9 +121,9 @@ const travelData = [
   {
     name: "江西景德镇",
     country: "中国",
-    coords: [44.0734, 117.8832],
+    coords: [29.3034, 117.2450],
     date: "2024-08",
-    description: "第一次家人出游（未齐）",
+    description: "来到卷卷工作的地方",
     photos: [
       {
         url: "./photos/景德镇1.jpg",
