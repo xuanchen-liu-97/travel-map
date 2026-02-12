@@ -123,11 +123,11 @@ const travelData = [
     photos: [
       {
         url: "./photos/景德镇1.jpg",
-        caption: "我的猪真美"
+        caption: "城市打卡照高手"
       },
       {
         url: "./photos/景德镇2.jpg",
-        caption: "城市打卡照高手"
+        caption: "我的猪真美"
       }
     ]
   },
