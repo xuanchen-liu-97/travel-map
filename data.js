@@ -18,22 +18,22 @@
 
 const travelData = [
   {
-    name: "科茨沃尔德",
+    name: "剑桥",
     country: "英国",
     coords: [51.8902, -1.7586],
     date: "2025-08",
-    description: "探索英国的小镇",
+    description: "去了剑桥但没去剑桥大学",
     photos: [
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        url: "./photos/剑桥1.jpg",
+        caption: "Exterminate!"
       },
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
+        url: "./photos/剑桥2.jpg",
+        caption: "久闻叹息桥大名"
       },
       {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
+        url: "./photos/剑桥3.jpg",
         caption: ""
       }
     ]
@@ -90,10 +90,6 @@ const travelData = [
       {
         url: "./photos/内蒙1.jpg",
         caption: ""
-      },
-      {
-        url: "",
-        caption: ""
       }
     ]
   },
@@ -111,7 +107,7 @@ const travelData = [
       {
         url: "./photos/霞浦2.jpg",
         caption: ""
-      }
+      },
       {
         url: "./photos/霞浦3.jpg",
         caption: ""
@@ -145,7 +141,7 @@ const travelData = [
       {
         url: "DSC07776.jpg",
         caption: "黄河石林"
-      },
+      }
     ]
   },
 
