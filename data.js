@@ -43,19 +43,19 @@ const travelData = [
     country: "英国",
     coords: [50.7486, 0.1900],
     date: "2025-08",
-    description: "春天的东京，樱花盛开，在上野公园和目黑川沿岸漫步。",
+    description: "世界尽头--七姐妹白崖",
     photos: [
       {
-        url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800",
-        caption: "东京塔夜景"
+        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
+        caption: ""
       },
       {
-        url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800",
-        caption: "浅草寺"
+        url: "./photos/53e63925ac1b7dc58574a0a46b39d605.jpg",
+        caption: ""
       },
       {
-        url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800",
-        caption: "目黑川樱花"
+        url: "./57c723c874ad138d2c4cbde9bb0bd623.jpg",
+        caption: ""
       }
     ]
   },
@@ -81,20 +81,16 @@ const travelData = [
     ]
   },
   {
-    name: "景泰",
-    country: "中国甘肃",
+    name: "甘肃银川",
+    country: "中国",
     coords: [36.8902, 104.3171],
     date: "2024-03",
-    description: "千年古都的庭院与神社，时间仿佛在这里静止。",
+    description: "第一次一起看星星",
     photos: [
       {
-        url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
-        caption: "伏见稻荷大社"
+        url: "DSC07776.jpg",
+        caption: "黄河石林"
       },
-      {
-        url: "https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=800",
-        caption: "岚山竹林"
-      }
     ]
   },
   {
