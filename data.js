@@ -18,11 +18,11 @@
 
 const travelData = [
   {
-    name: "伦敦",
+    name: "科茨沃尔德",
     country: "英国",
-    coords: [51.5, 0.1],
+    coords: [51.8902, -1.7586],
     date: "2025-08",
-    description: "第一次来到英国",
+    description: "尝试英国的小镇",
     photos: [
       {
         url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
@@ -60,11 +60,11 @@ const travelData = [
     ]
   },
   {
-    name: "科茨沃尔德",
+    name: "伦敦",
     country: "英国",
-    coords: [51.8902, -1.7586],
+    coords: [51.5, 0.1],
     date: "2025-08",
-    description: "尝试英国的小镇",
+    description: "第一次来到英国",
     photos: [
       {
         url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
@@ -76,6 +76,61 @@ const travelData = [
       },
       {
         url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
+        caption: ""
+      }
+    ]
+  },
+  {
+    name: "内蒙古呼和浩特",
+    country: "中国",
+    coords: [44.0734, 117.8832],
+    date: "2024-08",
+    description: "第一次家人出游（未齐）",
+    photos: [
+      {
+        url: "./photos/内蒙1.jpg",
+        caption: ""
+      },
+      {
+        url: "",
+        caption: ""
+      }
+    ]
+  },
+  {
+    name: "福建霞浦",
+    country: "中国",
+    coords: [26.6581, 120.1281],
+    date: "2024-07",
+    description: "来到海边看星星",
+    photos: [
+      {
+        url: "./photos/霞浦1.jpg",
+        caption: ""
+      },
+      {
+        url: "./photos/霞浦2.jpg",
+        caption: ""
+      }
+      {
+        url: "./photos/霞浦3.jpg",
+        caption: ""
+      }
+    ]
+  },
+  {
+    name: "江西景德镇",
+    country: "中国",
+    coords: [44.0734, 117.8832],
+    date: "2024-08",
+    description: "第一次家人出游（未齐）",
+    photos: [
+      {
+        url: "./photos/景德镇1.jpg",
+        caption: ""
+      },
+      {
+        url: "./photos/景德镇2.jpg",
         caption: ""
       }
     ]
@@ -84,30 +139,13 @@ const travelData = [
     name: "甘肃银川",
     country: "中国",
     coords: [36.8902, 104.3171],
-    date: "2024-03",
+    date: "2023-08",
     description: "第一次一起看星星",
     photos: [
       {
         url: "DSC07776.jpg",
         caption: "黄河石林"
       },
-    ]
-  },
-  {
-    name: "呼和浩特",
-    country: "中国内蒙古",
-    coords: [44.0734, 117.8832],
-    date: "2024-03",
-    description: "第一次家人出游（未齐）",
-    photos: [
-      {
-        url: "./photos/0560039db64b46712dfc8918f785b87d.jpg",
-        caption: ""
-      },
-      {
-        url: "",
-        caption: ""
-      }
     ]
   },
 
